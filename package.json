@@ -1,0 +1,12 @@
+{
+  "name": "decentraland-dummy-token-challenge",
+  "version": "0.1.0",
+  "description": "This is a challenge for Full Stack developers from decentraland.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "workspaces": [
+    "dummy-token",
+    "ui"
+  ]
+}

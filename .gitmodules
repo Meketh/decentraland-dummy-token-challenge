@@ -1,0 +1,3 @@
+[submodule "dummy-token"]
+	path = dummy-token
+	url = https://github.com/decentraland/dummy-token
