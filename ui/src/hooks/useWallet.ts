@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { connectWallet } from '../services/wallet'
+import { connectWallet, getTokenBalance } from '../services/wallet'
 
 export function useConnectWallet() {
   const queryClient = useQueryClient()
@@ -8,7 +8,7 @@ export function useConnectWallet() {
     mutationFn: connectWallet,
     onSuccess: address => {
       queryClient.setQueryData(['wallet', 'address'], address)
-      queryClient.invalidateQueries({ queryKey: ['wallet'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet', 'balance'] })
     }
   })
 }
@@ -16,7 +16,16 @@ export function useConnectWallet() {
 export function useWalletAddress() {
   return useQuery<string | undefined>({
     enabled: false, // Only set via mutation
-    // queryFn: () => undefined,
     queryKey: ['wallet', 'address']
+  })
+}
+
+export function useTokenBalance() {
+  const { data: address } = useWalletAddress()
+
+  return useQuery({
+    queryKey: ['wallet', 'balance', address],
+    queryFn: () => getTokenBalance(address!),
+    enabled: !!address
   })
 }

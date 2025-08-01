@@ -13,10 +13,16 @@ export const TOKEN_ABI = [
   'function balanceOf(address) view returns (uint)',
   'function transfer(address to, uint amount)'
 ]
+const token = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, provider)
 
 export async function connectWallet() {
   await provider.send('eth_requestAccounts', [])
   const signer = await provider.getSigner()
   const address = await signer.getAddress()
   return address
+}
+
+export async function getTokenBalance(address: string) {
+  const balance: bigint = await token.balanceOf(address)
+  return ethers.formatUnits(balance, 4)
 }

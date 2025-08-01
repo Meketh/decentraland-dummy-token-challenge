@@ -1,11 +1,12 @@
 import React from 'react'
 import { Button, Card, Center, Footer, Header, Navbar, Page } from 'decentraland-ui'
-import { useConnectWallet, useWalletAddress } from '../hooks/useWallet'
+import { useConnectWallet, useWalletAddress, useTokenBalance } from '../hooks/useWallet'
 import './App.css'
 
 export const App: React.FC = () => {
   const connectWallet = useConnectWallet()
   const { data: address } = useWalletAddress()
+  const { data: balance, isLoading: isLoadingBalance } = useTokenBalance()
   const isConnected = !!address
 
   return (
@@ -27,6 +28,15 @@ export const App: React.FC = () => {
                 <strong>Address:</strong>
                 {` ${address.slice(0, 6)}...${address.slice(-4)}`}
               </p>
+              {isLoadingBalance ? (
+                <p>Loading balance...</p>
+              ) : balance ? (
+                <p>
+                  <strong>Balance:</strong>
+                  {` ${balance} `}
+                  <strong>DUMMY</strong>
+                </p>
+              ) : null}
             </Card>
           )}
         </Center>
