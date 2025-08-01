@@ -1,12 +1,35 @@
 {
   "name": "decentraland-dummy-token-challenge",
   "version": "0.1.0",
+  "type": "module",
   "description": "This is a challenge for Full Stack developers from decentraland.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "npx playwright install",
+    "start": "run-p local:net ui:start",
+    "local:net": "run-p local:net:*",
+    "local:net:start": "cd dummy-token && npx hardhat node --hostname localhost",
+    "local:net:token": "wait-on http://localhost:8545/ && sh init-token.sh",
+    "ui:start": "cd ui && wait-on .env && npm run start",
+    "e2e": "run-p -r start e2e:*",
+    "e2e:test": "npx synpress e2e && npx playwright test",
+    "lint": "eslint ."
   },
   "workspaces": [
     "dummy-token",
     "ui"
-  ]
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@swc/core": "^1.13.3",
+    "@synthetixio/synpress": "^4.1.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "npm-run-all2": "^8.0.4",
+    "prettier": "^3.4.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.18.2",
+    "wait-on": "^8.0.4"
+  }
 }
