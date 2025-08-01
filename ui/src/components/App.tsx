@@ -1,9 +1,13 @@
 import React from 'react'
 import { Button, Card, Center, Footer, Header, Navbar, Page } from 'decentraland-ui'
-import { Props } from './App.types'
+import { useConnectWallet, useWalletAddress } from '../hooks/useWallet'
 import './App.css'
 
-const App: React.FC<Props> = ({ address, isConnected, onConnect, isConnecting, error }) => {
+export const App: React.FC = () => {
+  const connectWallet = useConnectWallet()
+  const { data: address } = useWalletAddress()
+  const isConnected = !!address
+
   return (
     <>
       <Navbar activePage="Wallet" />
@@ -11,17 +15,17 @@ const App: React.FC<Props> = ({ address, isConnected, onConnect, isConnecting, e
         <Center>
           {!isConnected ? (
             <>
-              <Button primary onClick={onConnect} loading={isConnecting}>
+              <Button primary onClick={() => connectWallet.mutate()} loading={connectWallet.isPending}>
                 Connect
               </Button>
-              {error ? <p className="error">{error}</p> : null}
+              {connectWallet.error ? <p className="error">{connectWallet.error.message}</p> : null}
             </>
           ) : (
             <Card>
               <Header>Wallet</Header>
               <p>
-                <strong>Address:</strong>&nbsp;
-                {address.slice(0, 6) + '...' + address.slice(-4)}
+                <strong>Address:</strong>
+                {` ${address.slice(0, 6)}...${address.slice(-4)}`}
               </p>
             </Card>
           )}
@@ -31,5 +35,3 @@ const App: React.FC<Props> = ({ address, isConnected, onConnect, isConnecting, e
     </>
   )
 }
-
-export default App

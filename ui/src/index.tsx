@@ -1,14 +1,11 @@
-import ReactDOM from 'react-dom'
-import { Provider } from 'react-redux'
-
+import { render } from 'react-dom'
 import { App } from './components/App'
-import { store } from './modules/store'
-
+import { QueryProvider } from './providers/QueryProvider'
 import 'decentraland-ui/lib/styles.css'
 
-ReactDOM.render(
-  <Provider store={store}>
+render(
+  <QueryProvider>
     <App />
-  </Provider>,
+  </QueryProvider>,
   document.getElementById('root')
 )
