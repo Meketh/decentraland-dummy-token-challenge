@@ -4,7 +4,7 @@ This is a challenge for Full Stack developers from decentraland.
 
 ## Objectives
 
-- [ ] Check token balance.
+- [x] Check token balance.
 - [ ] Transfer tokens from wallet.
 
 ## Nice to have
@@ -16,14 +16,19 @@ This is a challenge for Full Stack developers from decentraland.
 ## Setup
 
 1. Run `npm install`
-2. Run `npm run e2e`
+2. Run `npm run e2e` to run the e2e tests
+3. Run `npm start` to start the app
 
 ## WHY ?!
 
-- Why use a submodule instead of a copy of dummy-token ?
+- Why use a submodule instead of a copy of `dummy-token` ?
 
-  I decided to think of it as a dependancy so it's keept clean in it's original form. That's why I didn't change it's scripts though it would have been easier that way.
+  I decided to think of it as a dependency so it's kept clean in its original form. That's why I didn't change it's scripts though it would have been easier that way.
 
-- Why e2e instead of unit tests ?
+- Why `e2e` instead of `unit tests` ?
 
-  UI is mostly integration code, in fact this example is almost only integration code.
+  UI is mostly integration code, in fact this example is only integration code. And for testing such code is better to use `e2e tests`. `Unit tests` will be very cumbersome to handle (with mocks and spies).
+
+- Why `react-query` instead of `redux` ?
+
+  `Redux` is, though highly verbose, a good solution for handling global state. However, in this case we are just using remote state (the chain). `React-query` is a better fit for handling that.
