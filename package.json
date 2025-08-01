@@ -5,12 +5,12 @@
   "description": "This is a challenge for Full Stack developers from decentraland.",
   "scripts": {
     "postinstall": "npx playwright install",
-    "start": "run-p local:net ui:start",
+    "start": "run-p local:net 'ui:start -- -- --open'",
     "local:net": "run-p local:net:*",
     "local:net:start": "cd dummy-token && npx hardhat node --hostname localhost",
     "local:net:token": "wait-on http://localhost:8545/ && sh init-token.sh",
     "ui:start": "cd ui && wait-on .env && npm run start",
-    "e2e": "run-p -r start e2e:*",
+    "e2e": "run-p -r local:net ui:start e2e:*",
     "e2e:test": "npx synpress e2e && npx playwright test",
     "lint": "eslint ."
   },
