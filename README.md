@@ -32,3 +32,7 @@ This is a challenge for Full Stack developers from decentraland.
 - Why `react-query` instead of `redux` ?
 
   `Redux` is, though highly verbose, a good solution for handling global state. However, in this case we are just using remote state (the chain). `React-query` is a better fit for handling that.
+
+- Why remove the Navbar ?
+
+  It has nothing to do with the assignment because it's not modifiable and has lopgic specific to decentraland. That's probably the reason why it throws some errors to the console that I can't fix and I don't want to pollute the console.

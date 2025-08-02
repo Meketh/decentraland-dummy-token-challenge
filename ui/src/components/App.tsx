@@ -1,6 +1,6 @@
 import React from 'react'
-import { Button, Card, Center, Footer, Header, Navbar, Page } from 'decentraland-ui'
-import { useConnectWallet, useWalletAddress, useTokenBalance } from '../hooks/useWallet'
+import { Logo, Button, Center, Header, Page, Footer, Card } from 'decentraland-ui'
+import { useConnectWallet, useWalletAddress, useTokenBalance } from '../services/wallet'
 import './App.css'
 
 export const App: React.FC = () => {
@@ -11,7 +11,7 @@ export const App: React.FC = () => {
 
   return (
     <>
-      <Navbar activePage="Wallet" />
+      <Logo />
       <Page className="App">
         <Center>
           {!isConnected ? (
