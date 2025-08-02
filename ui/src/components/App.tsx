@@ -2,7 +2,6 @@ import type { FC } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { Logo, Center, Page, Footer } from 'decentraland-ui'
 import { useWalletAddress } from '../services/wallet'
-import './App.css'
 
 export const App: FC = () => {
   const { data: address } = useWalletAddress()
@@ -10,7 +9,7 @@ export const App: FC = () => {
 
   return (
     <>
-      <nav>
+      <nav className="p-4! flex! items-center gap-8  [&_a]:text-inactive! [&_a.active]:text-active!">
         <Logo />
         {isConnected ? (
           <>

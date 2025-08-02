@@ -1,9 +1,0 @@
-.page {
-  .ui.card {
-    padding: 16px;
-  }
-  .error {
-    margin-top: 20px;
-    color: var(--primary);
-  }
-}
