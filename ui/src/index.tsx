@@ -1,11 +1,12 @@
 import { render } from 'react-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './services/queryClient'
 import { App } from './components/App'
-import { QueryProvider } from './providers/QueryProvider'
 import 'decentraland-ui/lib/styles.css'
 
 render(
-  <QueryProvider>
+  <QueryClientProvider client={queryClient}>
     <App />
-  </QueryProvider>,
+  </QueryClientProvider>,
   document.getElementById('root')
 )

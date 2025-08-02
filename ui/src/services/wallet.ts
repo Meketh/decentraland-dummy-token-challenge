@@ -1,28 +1,79 @@
-import { ethers } from 'ethers'
-const { ethereum } = window as unknown as {
-  ethereum: ethers.Eip1193Provider
-}
-const provider = new ethers.BrowserProvider(ethereum)
+import type { Eip1193Compatible } from 'web3'
+import { BrowserProvider, Contract, formatUnits } from 'ethers'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { queryClient } from './queryClient'
 
-export const TOKEN_ADDRESS = import.meta.env.VITE_TOKEN_ADDRESS
+export function useConnectWallet() {
+  return useMutation<string, Error>({ mutationFn: connectWallet })
+}
+
+export function useWalletAddress() {
+  return useQuery<string | undefined>({
+    enabled: false, // Only set via mutation
+    queryKey: ['wallet', 'address']
+  })
+}
+
+export function useTokenBalance() {
+  const { data: address } = useWalletAddress()
+
+  return useQuery({
+    queryKey: ['wallet', address, 'balance'],
+    queryFn: () => getTokenBalance(address!),
+    enabled: !!address
+  })
+}
+
+const ethereum = (window as unknown as { ethereum: Eip1193Compatible }).ethereum
+
+const TOKEN_ADDRESS = import.meta.env.VITE_TOKEN_ADDRESS
 if (!TOKEN_ADDRESS) {
   console.error(`Missing env variable VITE_TOKEN_ADDRESS`)
 }
-export const TOKEN_ABI = [
+const TOKEN_ABI = [
   'function symbol() view returns (string)',
   'function balanceOf(address) view returns (uint)',
   'function transfer(address to, uint amount)'
 ]
-const token = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, provider)
 
-export async function connectWallet() {
+let provider: BrowserProvider
+let token: Contract
+
+if (ethereum) initProvider()
+async function initProvider() {
+  provider = new BrowserProvider(ethereum)
+  token = new Contract(TOKEN_ADDRESS, TOKEN_ABI, provider)
+
+  // TODO: Check if we are on the correct chain
+  // ethereum.removeAllListeners?.('chainChanged')
+  // ethereum.on('chainChanged', chainId => {
+  //   console.log('chainChanged', chainId)
+  // })
+  // const chainId :string= await provider.send('eth_chainId', [])
+
+  ethereum.removeAllListeners?.('accountsChanged')
+  ethereum.on('accountsChanged', updateAddress)
+
+  const accounts: string[] = await provider.send('eth_accounts', [])
+  updateAddress(accounts)
+  if (accounts.length > 0) connectWallet()
+}
+
+function updateAddress([address]: string[]) {
+  if (!address) return queryClient.resetQueries({ queryKey: ['wallet'] })
+  queryClient.setQueryData(['wallet', 'address'], address)
+  queryClient.invalidateQueries({ queryKey: ['wallet', address, 'balance'] })
+}
+
+async function connectWallet() {
+  if (!provider) throw new Error('Wallet provider missing!')
   await provider.send('eth_requestAccounts', [])
   const signer = await provider.getSigner()
   const address = await signer.getAddress()
   return address
 }
 
-export async function getTokenBalance(address: string) {
+async function getTokenBalance(address: string) {
   const balance: bigint = await token.balanceOf(address)
-  return ethers.formatUnits(balance, 4)
+  return formatUnits(balance, 4)
 }
