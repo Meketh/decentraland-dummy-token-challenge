@@ -1,44 +1,29 @@
-import React from 'react'
-import { Logo, Button, Center, Header, Page, Footer, Card } from 'decentraland-ui'
-import { useConnectWallet, useWalletAddress, useTokenBalance } from '../services/wallet'
+import type { FC } from 'react'
+import { Outlet, NavLink } from 'react-router-dom'
+import { Logo, Center, Page, Footer } from 'decentraland-ui'
+import { useWalletAddress } from '../services/wallet'
 import './App.css'
 
-export const App: React.FC = () => {
-  const connectWallet = useConnectWallet()
+export const App: FC = () => {
   const { data: address } = useWalletAddress()
-  const { data: balance, isLoading: isLoadingBalance } = useTokenBalance()
   const isConnected = !!address
 
   return (
     <>
-      <Logo />
-      <Page className="App">
+      <nav>
+        <Logo />
+        {isConnected ? (
+          <>
+            <NavLink to="/">Wallet</NavLink>
+            <NavLink to="/transfer">Transfer</NavLink>
+            <NavLink to="/pending">Pending</NavLink>
+          </>
+        ) : null}
+      </nav>
+
+      <Page>
         <Center>
-          {!isConnected ? (
-            <>
-              <Button primary onClick={() => connectWallet.mutate()} loading={connectWallet.isPending}>
-                Connect
-              </Button>
-              {connectWallet.error ? <p className="error">{connectWallet.error.message}</p> : null}
-            </>
-          ) : (
-            <Card>
-              <Header>Wallet</Header>
-              <p>
-                <strong>Address:</strong>
-                {` ${address.slice(0, 6)}...${address.slice(-4)}`}
-              </p>
-              {isLoadingBalance ? (
-                <p>Loading balance...</p>
-              ) : balance ? (
-                <p>
-                  <strong>Balance:</strong>
-                  {` ${balance} `}
-                  <strong>DUMMY</strong>
-                </p>
-              ) : null}
-            </Card>
-          )}
+          <Outlet />
         </Center>
       </Page>
       <Footer />

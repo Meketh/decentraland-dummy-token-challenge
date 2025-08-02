@@ -2,6 +2,7 @@ import type { Eip1193Compatible } from 'web3'
 import { BrowserProvider, Contract, formatUnits } from 'ethers'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
+import { router } from './router'
 
 export function useConnectWallet() {
   return useMutation<string, Error>({ mutationFn: connectWallet })
@@ -60,9 +61,13 @@ async function initProvider() {
 }
 
 function updateAddress([address]: string[]) {
-  if (!address) return queryClient.resetQueries({ queryKey: ['wallet'] })
-  queryClient.setQueryData(['wallet', 'address'], address)
-  queryClient.invalidateQueries({ queryKey: ['wallet', address, 'balance'] })
+  if (address) {
+    queryClient.setQueryData(['wallet', 'address'], address)
+    queryClient.invalidateQueries({ queryKey: ['wallet', address, 'balance'] })
+  } else {
+    queryClient.resetQueries({ queryKey: ['wallet'] })
+    router.navigate('/')
+  }
 }
 
 async function connectWallet() {
