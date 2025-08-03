@@ -25,6 +25,7 @@
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
+    "ethers": "^6.15.0",
     "globals": "^15.14.0",
     "npm-run-all2": "^8.0.4",
     "playwright": "^1.54.2",

@@ -1,17 +1,22 @@
+import { JsonRpcProvider, Contract, formatUnits } from 'ethers'
 import { testWithSynpress } from '@synthetixio/synpress'
 import { MetaMask, metaMaskFixtures } from '@synthetixio/synpress/playwright'
-import walletSetup, { ADDRESSES } from './wallet.setup'
+import walletSetup, { NETWORK, ADDRESSES, TOKEN_ADDRESS } from './wallet.setup'
 
 const it = testWithSynpress(metaMaskFixtures(walletSetup))
 const { expect, describe, beforeEach } = it
 
+let wallet: MetaMask
+beforeEach(async ({ context, metamaskPage, extensionId }) => {
+  wallet = new MetaMask(context, metamaskPage, walletSetup.walletPassword, extensionId)
+})
+
 const [sender, recipient] = ADDRESSES
 const shortAddress = sender.slice(0, 6) + '...' + sender.slice(-4)
-
-let metamask: MetaMask
-beforeEach(async ({ context, metamaskPage, extensionId }) => {
-  metamask = new MetaMask(context, metamaskPage, walletSetup.walletPassword, extensionId)
-})
+const provider = new JsonRpcProvider(NETWORK.rpcUrl)
+const TOKEN_ABI = ['function balanceOf(address) view returns (uint)']
+type TokenContract = Contract & { balanceOf(address: string): Promise<bigint> }
+const token = new Contract(TOKEN_ADDRESS, TOKEN_ABI, provider) as TokenContract
 
 it('should connect to wallet', async ({ page }) => {
   await page.goto('/')
@@ -19,7 +24,7 @@ it('should connect to wallet', async ({ page }) => {
 
   // Try to connect
   await page.getByRole('button', { name: 'Connect' }).click()
-  await metamask.connectToDapp()
+  await wallet.connectToDapp()
   await expect(page.getByText(shortAddress)).toBeAttached()
 })
 
@@ -27,7 +32,7 @@ describe('While connected to wallet', () => {
   beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Connect' }).click()
-    await metamask.connectToDapp()
+    await wallet.connectToDapp()
   })
 
   it('should remember previous connections', async ({ page }) => {
@@ -40,7 +45,7 @@ describe('While connected to wallet', () => {
     await expect(page.getByText(shortAddress)).toBeAttached()
 
     // "Disconnect"
-    await metamask.lock()
+    await wallet.lock()
     await page.reload()
 
     await expect(page.getByText(shortAddress)).not.toBeAttached()
@@ -95,19 +100,18 @@ describe('While connected to wallet', () => {
       await expect(page.getByLabel('amount')).toHaveValue('')
     })
 
-    // it('should set amount to balance when max button is clicked', async ({ page }) => {
-    //   const balance = await metamask
-
-    //   await page.getByRole('button', { name: 'Max' }).click()
-    //   await expect(page.getByLabel('amount')).toHaveValue(balance)
-    // })
+    it('should set amount to balance when max button is clicked', async ({ page }) => {
+      const balance = formatUnits(await token.balanceOf(sender), 4)
+      await page.getByRole('button', { name: 'Max' }).click()
+      await expect(page.getByLabel('amount')).toHaveValue(balance?.toString())
+    })
 
     it('should transfer tokens', async ({ page }) => {
       await page.getByLabel('recipient').fill(recipient)
       await page.getByLabel('amount').fill('13')
 
       await page.getByRole('button', { name: 'Transfer' }).click()
-      await metamask.confirmTransaction()
+      await wallet.confirmTransaction()
       await expect(page.getByText('Transfer successful!')).toBeAttached()
     })
   })

@@ -1,5 +1,5 @@
 import type { Eip1193Compatible } from 'web3'
-import type { BaseContract, TransactionResponse } from 'ethers'
+import type { TransactionResponse } from 'ethers'
 import { BrowserProvider, Contract, formatUnits } from 'ethers'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
@@ -47,7 +47,7 @@ const TOKEN_ABI = [
   'function balanceOf(address) view returns (uint)',
   'function transfer(address to, uint amount)'
 ]
-type TokenContract = BaseContract & {
+type TokenContract = Contract & {
   symbol(): Promise<string>
   balanceOf(address: string): Promise<bigint>
   transfer(to: string, amount: bigint): Promise<TransactionResponse>

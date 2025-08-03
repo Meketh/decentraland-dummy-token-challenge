@@ -9,8 +9,7 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       { path: '/', element: <Wallet /> },
-      { path: 'transfer', element: <Transfer /> },
-      { path: 'pending', element: <div>Pending</div> }
+      { path: 'transfer', element: <Transfer /> }
     ]
   }
 ])

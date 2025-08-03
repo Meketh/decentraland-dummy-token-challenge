@@ -15,7 +15,6 @@ export const App: FC = () => {
           <>
             <NavLink to="/">Wallet</NavLink>
             <NavLink to="/transfer">Transfer</NavLink>
-            <NavLink to="/pending">Pending</NavLink>
           </>
         ) : null}
       </nav>
