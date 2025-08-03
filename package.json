@@ -11,7 +11,7 @@
     "local:net:token": "wait-on http://localhost:8545/ && sh init-token.sh",
     "ui:start": "cd ui && wait-on .env && npm run start",
     "e2e": "run-p -r local:net ui:start e2e:*",
-    "e2e:test": "npx synpress e2e && npx playwright test",
+    "e2e:test": "npx synpress e2e --headless && playwright test",
     "lint": "eslint ."
   },
   "workspaces": [

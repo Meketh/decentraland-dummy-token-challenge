@@ -1,7 +1,7 @@
 import { defineWalletSetup } from '@synthetixio/synpress'
 import { MetaMask, getExtensionId } from '@synthetixio/synpress/playwright'
 
-export const ADDRESS = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
+export const ADDRESSES = ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', '0x70997970C51812dc3A010C7d01b50e0d17dc79C8']
 const SEED_PHRASE = 'test test test test test test test test test test test junk'
 const PASSWORD = 'Tester@1234'
 

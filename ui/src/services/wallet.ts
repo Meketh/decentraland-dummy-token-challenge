@@ -1,4 +1,5 @@
 import type { Eip1193Compatible } from 'web3'
+import type { BaseContract, TransactionResponse } from 'ethers'
 import { BrowserProvider, Contract, formatUnits } from 'ethers'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
@@ -20,8 +21,18 @@ export function useTokenBalance() {
 
   return useQuery({
     queryKey: ['wallet', address, 'balance'],
-    queryFn: () => getTokenBalance(address!),
+    queryFn: () => getTokenBalance(address),
     enabled: !!address
+  })
+}
+
+export function useTransferToken() {
+  return useMutation<string, Error, { to: string; amount: string }>({
+    mutationFn: ({ to, amount }) => transferToken(to, amount),
+    onSuccess: () => {
+      // Invalidate balance queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['wallet'] })
+    }
   })
 }
 
@@ -36,6 +47,11 @@ const TOKEN_ABI = [
   'function balanceOf(address) view returns (uint)',
   'function transfer(address to, uint amount)'
 ]
+type TokenContract = BaseContract & {
+  symbol(): Promise<string>
+  balanceOf(address: string): Promise<bigint>
+  transfer(to: string, amount: bigint): Promise<TransactionResponse>
+}
 
 let provider: BrowserProvider
 let token: Contract
@@ -78,7 +94,20 @@ async function connectWallet() {
   return address
 }
 
-async function getTokenBalance(address: string) {
+async function getTokenBalance(address: string | undefined) {
+  if (!address) return null
   const balance: bigint = await token.balanceOf(address)
   return formatUnits(balance, 4)
+}
+
+async function transferToken(to: string, amount: string) {
+  if (!provider) throw new Error('Wallet provider missing!')
+
+  const signer = await provider.getSigner()
+  const tokenWithSigner = token.connect(signer) as TokenContract
+  const amountInUnits = BigInt(parseFloat(amount) * 10_000)
+
+  const tx = await tokenWithSigner.transfer(to, amountInUnits)
+  await tx.wait()
+  return tx.hash
 }

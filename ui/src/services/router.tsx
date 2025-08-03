@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { App } from '../components/App'
 import { Wallet } from '../components/Wallet'
+import { Transfer } from '../components/Transfer'
 
 export const router = createBrowserRouter([
   {
@@ -8,7 +9,7 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       { path: '/', element: <Wallet /> },
-      { path: 'transfer', element: <div>Transfer</div> },
+      { path: 'transfer', element: <Transfer /> },
       { path: 'pending', element: <div>Pending</div> }
     ]
   }
