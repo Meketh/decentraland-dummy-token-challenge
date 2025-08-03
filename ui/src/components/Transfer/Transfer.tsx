@@ -1,15 +1,10 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { Modal, Close, Field, Loader, Button } from 'decentraland-ui'
-import { useWalletAddress, useTokenBalance, useTransferToken } from '../services/wallet'
 import { NavLink } from 'react-router-dom'
-import { router } from '../services/router'
+import { Props } from './Transfer.types'
 
-export const Transfer: FC = () => {
-  const { data: address } = useWalletAddress()
-  const { data: balance, isLoading: isLoadingBalance } = useTokenBalance()
-  const transferToken = useTransferToken()
-
+const Transfer: FC<Props> = ({ address, balance, isLoadingBalance, isTransferring, transferError, onTransfer }) => {
   const [recipient, setRecipient] = useState('')
   const [recipientError, setRecipientError] = useState('')
 
@@ -46,16 +41,10 @@ export const Transfer: FC = () => {
     }
   }
 
-  const send = async (e: React.FormEvent) => {
+  const send = (e: React.FormEvent) => {
     e.preventDefault()
     if (!validateForm()) return
-
-    try {
-      await transferToken.mutateAsync({ to: recipient.trim(), amount: amount.trim() })
-      router.navigate('/')
-    } catch (error) {
-      console.error('Transfer failed:', error)
-    }
+    onTransfer(recipient.trim(), amount.trim())
   }
 
   const setMax = () => {
@@ -80,7 +69,8 @@ export const Transfer: FC = () => {
           <p className="text-center">Send tokens to an account</p>
           <p>
             <strong>Your Balance:</strong>
-            {` ${balance || '0'} DUMMY`}
+            {` ${currentBalance} `}
+            <strong>DUMMY</strong>
           </p>
         </div>
 
@@ -98,7 +88,7 @@ export const Transfer: FC = () => {
             onBlur={validateAmount}
           />
 
-          <Button type="button" size="small" disabled={!balance || transferToken.isPending} onClick={setMax}>
+          <Button type="button" size="small" disabled={!balance || isTransferring} onClick={setMax}>
             Max
           </Button>
         </div>
@@ -114,20 +104,17 @@ export const Transfer: FC = () => {
           message={recipientError}
           onBlur={validateAddress}
         />
+
+        {transferError && <p className="text-warn! font-bold">Transfer failed: {transferError}</p>}
       </Modal.Content>
 
       <Modal.Actions>
-        <Button
-          primary
-          onClick={send}
-          loading={transferToken.isPending}
-          disabled={!recipient || !amount || transferToken.isPending || isLoadingBalance}
-        >
-          {transferToken.isPending ? <Loader active inline size="tiny" /> : 'Send'}
+        <Button primary onClick={send} loading={isTransferring} disabled={!recipient || !amount || isTransferring || isLoadingBalance}>
+          {isTransferring ? <Loader active inline size="tiny" /> : 'Send'}
         </Button>
       </Modal.Actions>
     </Modal>
   )
 }
-// {transferToken.error && <p className="text-warn! font-bold">Transfer failed: {transferToken.error.message}</p>}
-// {transferToken.isSuccess && <p className="text-success! font-bold">Transfer successful! Transaction hash: {transferToken.data}</p>}
+
+export default Transfer

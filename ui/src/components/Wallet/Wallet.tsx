@@ -1,21 +1,16 @@
 import type { FC } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Button, Header, Card } from 'decentraland-ui'
-import { useConnectWallet, useWalletAddress, useTokenBalance } from '../services/wallet'
+import { Props } from './Wallet.types'
 
-export const Wallet: FC = () => {
-  const connectWallet = useConnectWallet()
-  const { data: address } = useWalletAddress()
-  const { data: balance, isLoading: isLoadingBalance } = useTokenBalance()
-  const isConnected = !!address
-
+const Wallet: FC<Props> = ({ formattedAddress, isConnected, isConnecting, error, balance, isLoadingBalance, balanceError, onConnect }) => {
   if (!isConnected) {
     return (
       <>
-        <Button primary onClick={() => connectWallet.mutate()} loading={connectWallet.isPending}>
+        <Button primary onClick={onConnect} loading={isConnecting}>
           Connect
         </Button>
-        {connectWallet.error ? <p className="p-4! text-warn! font-bold">{connectWallet.error.message}</p> : null}
+        {error ? <p className="p-4! text-warn! font-bold">{error}</p> : null}
       </>
     )
   }
@@ -25,10 +20,12 @@ export const Wallet: FC = () => {
       <Header>Wallet</Header>
       <p className="gap-2 flex">
         <strong>Address:</strong>
-        {`${address.slice(0, 6)}...${address.slice(-4)}`}
+        {formattedAddress}
       </p>
       {isLoadingBalance ? (
         <p>Loading balance...</p>
+      ) : balanceError ? (
+        <p className="text-warn! font-bold">Error loading balance: {balanceError}</p>
       ) : (
         <p className="gap-2 flex uppercase">
           <strong>Balance:</strong>
@@ -40,3 +37,5 @@ export const Wallet: FC = () => {
     </Card>
   )
 }
+
+export default Wallet

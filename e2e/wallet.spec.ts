@@ -113,5 +113,15 @@ describe('While connected to wallet', () => {
       expect(+newBalance).toBe(+expectedBalance)
       await expect(page.getByText(newBalance)).toBeAttached()
     })
+
+    it('should fail when user denies transaction', async ({ page }) => {
+      await page.getByLabel('address').fill(recipient)
+      await page.getByLabel('amount').fill('10')
+
+      await page.getByRole('button', { name: 'Send' }).click()
+      await wallet.rejectTransaction()
+
+      await expect(page.getByText('User denied transaction signature')).toBeAttached()
+    })
   })
 })

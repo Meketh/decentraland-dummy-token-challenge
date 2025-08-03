@@ -1,14 +1,14 @@
 import { render } from 'react-dom'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './services/queryClient'
+import { Provider } from 'react-redux'
 import { RouterProvider } from 'react-router-dom'
+import { store } from './modules/store'
+import { router } from './services/router'
 import 'decentraland-ui/lib/styles.css'
 import './index.css'
-import { router } from './services/router'
 
 render(
-  <QueryClientProvider client={queryClient}>
+  <Provider store={store}>
     <RouterProvider router={router} future={{ v7_startTransition: true }} />
-  </QueryClientProvider>,
+  </Provider>,
   document.getElementById('root')
 )

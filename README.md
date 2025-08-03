@@ -10,7 +10,7 @@ This is a challenge for Full Stack developers from decentraland.
 ## Nice to have
 
 - [x] Transfer section as a new page with react-router.
-- [ ] Use reselect for selectors.
+- [x] Use reselect for selectors.
 - [ ] Add test using test network.
 
 ## Setup
@@ -28,10 +28,6 @@ This is a challenge for Full Stack developers from decentraland.
 - Why `e2e` instead of `unit tests` ?
 
   UI is mostly integration code, in fact this example is only integration code. And for testing such code is better to use `e2e tests`. `Unit tests` will be very cumbersome to handle (with mocks and spies).
-
-- Why `react-query` instead of `redux` ?
-
-  `Redux` is, though highly verbose, a good solution for handling global state. However, in this case we are just using remote state (the chain). `React-query` is a better fit for handling that.
 
 - Why remove the `Navbar` ?
 
