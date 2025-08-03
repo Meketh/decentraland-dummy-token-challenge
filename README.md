@@ -16,8 +16,13 @@ This is a challenge for Full Stack developers from decentraland.
 ## Setup
 
 1. Run `npm install`
-2. Run `npm run e2e` to run the e2e tests
-3. Run `npm start` to start the app
+
+2. Run `npm start` to start the app
+3. Run `npm run e2e:test` to run the e2e tests
+
+or
+
+2. Run `npm run e2e` to run the e2e tests as standalone processes
 
 ## WHY ?!
 
