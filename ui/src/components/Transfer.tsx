@@ -1,11 +1,13 @@
 import type { FC } from 'react'
 import { useState } from 'react'
-import { Button, Header, Card, Field, Input, Form, Loader } from 'decentraland-ui'
+import { Modal, Close, Field, Loader, Button } from 'decentraland-ui'
 import { useWalletAddress, useTokenBalance, useTransferToken } from '../services/wallet'
+import { NavLink } from 'react-router-dom'
+import { router } from '../services/router'
 
 export const Transfer: FC = () => {
   const { data: address } = useWalletAddress()
-  const { data: balance } = useTokenBalance()
+  const { data: balance, isLoading: isLoadingBalance } = useTokenBalance()
   const transferToken = useTransferToken()
 
   const [recipient, setRecipient] = useState('')
@@ -14,115 +16,118 @@ export const Transfer: FC = () => {
   const [amount, setAmount] = useState('')
   const [amountError, setAmountError] = useState('')
 
-  const currentBalance = parseFloat(balance || '0')
+  const currentBalance = +(balance || '0')
   const validateForm = () => validateAddress() && validateAmount()
 
   const validateAddress = () => {
-    if (!recipient.trim()) {
+    const trimmedRecipient = recipient.trim()
+    if (!trimmedRecipient) {
       setRecipientError('Recipient address is required')
-    } else if (!/^0x[a-fA-F0-9]{40}$/.test(recipient.trim())) {
+    } else if (!/^0x[a-fA-F0-9]{40}$/.test(trimmedRecipient)) {
       setRecipientError('Invalid Ethereum address format')
     } else if (recipient.toLowerCase() === address?.toLowerCase()) {
       setRecipientError('Cannot transfer to your own address')
-    } else return true
+    } else {
+      setRecipientError('')
+      return true
+    }
   }
 
   const validateAmount = () => {
-    if (!amount.trim()) {
-      return setAmountError('Amount is required')
-    }
-    const numAmount = parseFloat(amount)
+    if (!amount.trim()) return setAmountError('Amount is required')
+    const numAmount = +amount
     if (isNaN(numAmount) || numAmount <= 0) {
       setAmountError('Amount must be a positive number')
-    } else if (numAmount > currentBalance) {
+    } else if (!isLoadingBalance && numAmount > currentBalance) {
       setAmountError('Insufficient balance')
-    } else return true
+    } else {
+      setAmountError('')
+      return true
+    }
   }
 
-  const transfer = async (e: React.FormEvent) => {
+  const send = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validateForm()) return
 
     try {
       await transferToken.mutateAsync({ to: recipient.trim(), amount: amount.trim() })
-      clear()
+      router.navigate('/')
     } catch (error) {
       console.error('Transfer failed:', error)
     }
   }
 
-  const clear = () => {
-    setRecipient('')
-    setRecipientError('')
-    setAmount('')
+  const setMax = () => {
+    setAmount(balance || '0')
     setAmountError('')
   }
 
   return (
-    <Card className="p-4! w-auto!">
-      <Header>Transfer DUMMY Tokens</Header>
+    <Modal
+      size="small"
+      open={true}
+      closeIcon={
+        <NavLink to="/">
+          <Close />
+        </NavLink>
+      }
+    >
+      <Modal.Header className="text-center">Transfer</Modal.Header>
 
-      <div className="mb-4!">
-        <p>
-          <strong>Your Balance:</strong>
-          {` ${balance || '0'} DUMMY`}
-        </p>
-      </div>
+      <Modal.Content>
+        <div className="mb-4!">
+          <p className="text-center">Send tokens to an account</p>
+          <p>
+            <strong>Your Balance:</strong>
+            {` ${balance || '0'} DUMMY`}
+          </p>
+        </div>
 
-      <Form onSubmit={transfer}>
-        <Field
-          id="recipient"
-          label="Recipient Address"
-          error={!!recipientError}
-          message={recipientError}
-          input={
-            <Input
-              type="text"
-              placeholder="0x..."
-              value={recipient}
-              onChange={e => setRecipient(e.target.value)}
-              error={!!recipientError}
-              onBlur={validateForm}
-            />
-          }
-        />
-
-        <div className="flex gap-4 w-full items-center">
+        <div className="flex gap-4 items-center justify-between">
           <Field
             id="amount"
+            type="number"
             label="Amount"
+            className="flex-1"
+            placeholder="0.0"
+            value={amount}
+            onChange={e => (setAmount(e.target.value), setAmountError(''))}
             error={!!amountError}
             message={amountError}
-            input={
-              <Input
-                type="number"
-                placeholder="0.0"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                error={!!amountError}
-                className="flex-1"
-                onBlur={validateForm}
-              />
-            }
-          ></Field>
-          <Button type="button" size="small" onClick={() => setAmount(balance || '0')} disabled={!balance || transferToken.isPending}>
+            onBlur={validateAmount}
+          />
+
+          <Button type="button" size="small" disabled={!balance || transferToken.isPending} onClick={setMax}>
             Max
           </Button>
         </div>
 
-        <div className="flex justify-evenly">
-          <Button type="submit" primary loading={transferToken.isPending} disabled={!recipient || !amount || transferToken.isPending}>
-            {transferToken.isPending ? <Loader active inline size="tiny" /> : 'Transfer'}
-          </Button>
+        <Field
+          id="recipient"
+          type="address"
+          label="Address"
+          placeholder="0x..."
+          value={recipient}
+          onChange={e => (setRecipient(e.target.value), setRecipientError(''))}
+          error={!!recipientError}
+          message={recipientError}
+          onBlur={validateAddress}
+        />
+      </Modal.Content>
 
-          <Button type="button" onClick={clear} disabled={transferToken.isPending}>
-            Clear
-          </Button>
-        </div>
-
-        {transferToken.error && <p className="text-warn! font-bold">Transfer failed: {transferToken.error.message}</p>}
-        {transferToken.isSuccess && <p className="text-success! font-bold">Transfer successful! Transaction hash: {transferToken.data}</p>}
-      </Form>
-    </Card>
+      <Modal.Actions>
+        <Button
+          primary
+          onClick={send}
+          loading={transferToken.isPending}
+          disabled={!recipient || !amount || transferToken.isPending || isLoadingBalance}
+        >
+          {transferToken.isPending ? <Loader active inline size="tiny" /> : 'Send'}
+        </Button>
+      </Modal.Actions>
+    </Modal>
   )
 }
+// {transferToken.error && <p className="text-warn! font-bold">Transfer failed: {transferToken.error.message}</p>}
+// {transferToken.isSuccess && <p className="text-success! font-bold">Transfer successful! Transaction hash: {transferToken.data}</p>}

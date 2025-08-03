@@ -105,7 +105,7 @@ async function transferToken(to: string, amount: string) {
 
   const signer = await provider.getSigner()
   const tokenWithSigner = token.connect(signer) as TokenContract
-  const amountInUnits = BigInt(parseFloat(amount) * 10_000)
+  const amountInUnits = BigInt(+amount * 10_000)
 
   const tx = await tokenWithSigner.transfer(to, amountInUnits)
   await tx.wait()

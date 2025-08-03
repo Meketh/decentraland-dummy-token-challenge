@@ -1,24 +1,13 @@
 import type { FC } from 'react'
-import { Outlet, NavLink } from 'react-router-dom'
-import { Logo, Center, Page, Footer } from 'decentraland-ui'
-import { useWalletAddress } from '../services/wallet'
+import { Outlet, useLocation } from 'react-router-dom'
+import { Navbar, Center, Page, Footer } from 'decentraland-ui'
 
 export const App: FC = () => {
-  const { data: address } = useWalletAddress()
-  const isConnected = !!address
+  const location = useLocation()
 
   return (
     <>
-      <nav className="p-4! flex! items-center gap-8  [&_a]:text-inactive! [&_a.active]:text-active!">
-        <Logo />
-        {isConnected ? (
-          <>
-            <NavLink to="/">Wallet</NavLink>
-            <NavLink to="/transfer">Transfer</NavLink>
-          </>
-        ) : null}
-      </nav>
-
+      <Navbar activePage={location.key} />
       <Page>
         <Center>
           <Outlet />

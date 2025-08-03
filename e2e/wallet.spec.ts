@@ -54,10 +54,10 @@ describe('While connected to wallet', () => {
 
   it('should navigate to transfer page and show transfer form', async ({ page }) => {
     await page.getByText('Transfer').click()
-    expect(page.url()).toContain('/transfer')
+    await expect(page).toHaveURL('/transfer')
 
-    await expect(page.getByText('Transfer DUMMY Tokens')).toBeAttached()
-    await expect(page.getByLabel('recipient')).toBeAttached()
+    await expect(page.getByText('Send tokens to an account')).toBeAttached()
+    await expect(page.getByLabel('address')).toBeAttached()
     await expect(page.getByLabel('amount')).toBeAttached()
   })
 
@@ -68,36 +68,26 @@ describe('While connected to wallet', () => {
 
     it('should validate transfer', async ({ page }) => {
       // Fill form
-      await page.getByRole('button', { name: 'Transfer' }).isDisabled()
-      await page.getByLabel('recipient').fill(recipient)
+      await page.getByRole('button', { name: 'Send' }).isDisabled()
+      await page.getByLabel('address').fill(recipient)
       await page.getByLabel('amount').fill('10')
-      await page.getByRole('button', { name: 'Transfer' }).isEnabled()
+      await page.getByRole('button', { name: 'Send' }).isEnabled()
 
       // Test invalid address
-      await page.getByLabel('recipient').fill('invalid-address')
-      await page.getByRole('button', { name: 'Transfer' }).click()
+      await page.getByLabel('address').fill('invalid-address')
+      await page.getByRole('button', { name: 'Send' }).click()
       await expect(page.getByText('Invalid Ethereum address format')).toBeAttached()
 
       // Test self-transfer
-      await page.getByLabel('recipient').fill(sender)
-      await page.getByRole('button', { name: 'Transfer' }).click()
+      await page.getByLabel('address').fill(sender)
+      await page.getByRole('button', { name: 'Send' }).click()
       await expect(page.getByText('Cannot transfer to your own address')).toBeAttached()
 
       // Test invalid amount
-      await page.getByLabel('recipient').fill(recipient)
+      await page.getByLabel('address').fill(recipient)
       await page.getByLabel('amount').fill('-1')
-      await page.getByRole('button', { name: 'Transfer' }).click()
+      await page.getByRole('button', { name: 'Send' }).click()
       await expect(page.getByText('Amount must be a positive number')).toBeAttached()
-    })
-
-    it('should clear form when clear button is clicked', async ({ page }) => {
-      await page.getByLabel('recipient').fill(recipient)
-      await page.getByLabel('amount').fill('10')
-
-      // Clear form
-      await page.getByRole('button', { name: 'Clear' }).click()
-      await expect(page.getByLabel('recipient')).toHaveValue('')
-      await expect(page.getByLabel('amount')).toHaveValue('')
     })
 
     it('should set amount to balance when max button is clicked', async ({ page }) => {
@@ -107,12 +97,21 @@ describe('While connected to wallet', () => {
     })
 
     it('should transfer tokens', async ({ page }) => {
-      await page.getByLabel('recipient').fill(recipient)
-      await page.getByLabel('amount').fill('13')
+      const amount = 13.37
+      const oldBalance = formatUnits(await token.balanceOf(sender), 4)
+      await page.getByLabel('address').fill(recipient)
+      await page.getByLabel('amount').fill(amount.toString())
 
-      await page.getByRole('button', { name: 'Transfer' }).click()
-      await wallet.confirmTransaction()
-      await expect(page.getByText('Transfer successful!')).toBeAttached()
+      await expect(page.getByRole('button', { name: 'Send' })).toBeEnabled()
+      await page.getByRole('button', { name: 'Send' }).click()
+      await page.waitForTimeout(10_000)
+      await wallet.confirmTransactionAndWaitForMining()
+
+      await expect(page).toHaveURL('/')
+      const newBalance = formatUnits(await token.balanceOf(sender), 4)
+      const expectedBalance = (+oldBalance - amount).toFixed(4)
+      expect(+newBalance).toBe(+expectedBalance)
+      await expect(page.getByText(newBalance)).toBeAttached()
     })
   })
 })
