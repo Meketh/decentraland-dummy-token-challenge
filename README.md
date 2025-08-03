@@ -34,10 +34,6 @@ or
 
   UI is mostly integration code, in fact this example is only integration code. And for testing such code is better to use `e2e tests`. `Unit tests` will be very cumbersome to handle (with mocks and spies).
 
-- Why remove the `Navbar` ?
-
-  It has nothing to do with the assignment because it's not modifiable and has lopgic specific to decentraland. That's probably the reason why it throws some errors to the console that I can't fix and I don't want to pollute the console.
-
 - Why `tailwindcss` ?
 
   To avoid polution and better locality of behavior.
